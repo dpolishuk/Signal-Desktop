@@ -177,7 +177,6 @@
     "underscore": "1.12.1",
     "uuid": "3.3.2",
     "websocket": "1.0.28",
-    "react-giphy-searchbox": "file:./react-giphy-searchbox",
     "zod": "3.5.1"
   },
   "devDependencies": {

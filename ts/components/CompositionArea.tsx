@@ -60,8 +60,7 @@ import { MediaEditor } from './MediaEditor';
 import { IMAGE_PNG } from '../types/MIME';
 import { isImageTypeSupported } from '../util/GoogleChrome';
 import * as KeyboardLayout from '../services/keyboardLayout';
-import ReactGiphySearchbox from 'react-giphy-searchbox';
-import {Modal, ModalWindow} from './Modal';
+import { GiphyButton } from './stickers/GiphyButton';
 
 export type CompositionAPIType =
   | {
@@ -313,8 +312,6 @@ export const CompositionArea = ({
   const attachFileShortcut = useAttachFileShortcut(launchAttachmentPicker);
   useKeyboardShortcuts(attachFileShortcut);
 
-  // const giphyFetch = new GiphyFetch('SiJ005obRE0DfZEes7hpDquBJgu5tfWE');
-
   const focusInput = useCallback(() => {
     if (inputApiRef.current) {
       inputApiRef.current.focus();
@@ -429,29 +426,24 @@ export const CompositionArea = ({
     );
 
   const giphyButton = (
-    <>
-      <div className="CompositionArea__button-cell">
-        <button
-          type="button"
-          className="CompositionArea__attach-file"
-          onClick={handleShow}
-          aria-label={i18n('sendMessageToContact')}
-        />
-        {show ? (
-              <ModalWindow onClose={handleClose} i18n={i18n}>
-                <ReactGiphySearchbox
-                    apiKey="SiJ005obRE0DfZEes7hpDquBJgu5tfWE"
-                    onSelect={item => console.log(item)}
-                    masonryConfig={[
-                      { columns: 2, imageWidth: 110, gutter: 5 },
-                      { mq: '700px', columns: 3, imageWidth: 110, gutter: 5 },
-                    ]}
-                />
-              </ModalWindow>
-          ) : null
-        }
-      </div>
-    </>
+    <div className="CompositionArea__button-cell">
+      <GiphyButton
+        i18n={i18n}
+        knownPacks={knownPacks}
+        receivedPacks={receivedPacks}
+        installedPack={installedPack}
+        installedPacks={installedPacks}
+        blessedPacks={blessedPacks}
+        recentStickers={recentStickers}
+        clearInstalledStickerPack={clearInstalledStickerPack}
+        onClickAddPack={onClickAddPack}
+        onPickSticker={onPickSticker}
+        clearShowIntroduction={clearShowIntroduction}
+        showPickerHint={showPickerHint}
+        clearShowPickerHint={clearShowPickerHint}
+        position={'top-end'}
+      />
+    </div>
   );
 
   const sendButtonFragment = (
