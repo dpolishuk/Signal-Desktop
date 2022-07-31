@@ -60,6 +60,8 @@ import { MediaEditor } from './MediaEditor';
 import { IMAGE_PNG } from '../types/MIME';
 import { isImageTypeSupported } from '../util/GoogleChrome';
 import * as KeyboardLayout from '../services/keyboardLayout';
+import ReactGiphySearchbox from 'react-giphy-searchbox';
+import {Modal, ModalWindow} from './Modal';
 
 export type CompositionAPIType =
   | {
@@ -255,6 +257,7 @@ export const CompositionArea = ({
   isSMSOnly,
   isFetchingUUID,
 }: Props): JSX.Element => {
+  const [show, setShow] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [large, setLarge] = useState(false);
@@ -264,6 +267,9 @@ export const CompositionArea = ({
   const inputApiRef = useRef<InputApi | undefined>();
   const emojiButtonRef = useRef<EmojiButtonAPI | undefined>();
   const fileInputRef = useRef<null | HTMLInputElement>(null);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
 
   const handleForceSend = useCallback(() => {
     setLarge(false);
@@ -306,6 +312,8 @@ export const CompositionArea = ({
 
   const attachFileShortcut = useAttachFileShortcut(launchAttachmentPicker);
   useKeyboardShortcuts(attachFileShortcut);
+
+  // const giphyFetch = new GiphyFetch('SiJ005obRE0DfZEes7hpDquBJgu5tfWE');
 
   const focusInput = useCallback(() => {
     if (inputApiRef.current) {
@@ -419,6 +427,32 @@ export const CompositionArea = ({
         />
       </div>
     );
+
+  const giphyButton = (
+    <>
+      <div className="CompositionArea__button-cell">
+        <button
+          type="button"
+          className="CompositionArea__attach-file"
+          onClick={handleShow}
+          aria-label={i18n('sendMessageToContact')}
+        />
+        {show ? (
+              <ModalWindow onClose={handleClose} i18n={i18n}>
+                <ReactGiphySearchbox
+                    apiKey="SiJ005obRE0DfZEes7hpDquBJgu5tfWE"
+                    onSelect={item => console.log(item)}
+                    masonryConfig={[
+                      { columns: 2, imageWidth: 110, gutter: 5 },
+                      { mq: '700px', columns: 3, imageWidth: 110, gutter: 5 },
+                    ]}
+                />
+              </ModalWindow>
+          ) : null
+        }
+      </div>
+    </>
+  );
 
   const sendButtonFragment = (
     <>
@@ -703,6 +737,7 @@ export const CompositionArea = ({
             {stickerButtonFragment}
             {!dirty ? micButtonFragment : null}
             {attButton}
+            {giphyButton}
           </>
         ) : null}
       </div>
