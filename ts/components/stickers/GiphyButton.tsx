@@ -54,7 +54,16 @@ export const GiphyButton = React.memo(
       fetch(apiURL(searchString)).then((response) => {
         return response.json()
       }).then(function(json) {
-        setGifs(json.data);
+        Promise.all(json.data.map(async (item) => {
+          const data = await fetch(item.images.original.url);
+          const blob = await data.blob();
+          var urlCreator = window.URL || window.webkitURL;
+          var imageUrl = urlCreator.createObjectURL(blob);
+          return {
+            ...item,
+            blob: imageUrl
+          }
+        })).then(data => setGifs(data));
       }).catch(function(ex) {
         console.warn('ERROR: ', ex)
       })
@@ -177,7 +186,7 @@ export const GiphyButton = React.memo(
             <Modal hasXButton i18n={i18n} onClose={onClose}>
               {
                 gifs.map((item) => (
-                  <img data-url={`"${item?.images.original.url}"`} src={item?.images.original.url} />
+                  <img src={item?.blob} />
                 ))
               }
             </Modal>
