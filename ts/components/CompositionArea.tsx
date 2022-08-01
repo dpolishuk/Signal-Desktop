@@ -429,18 +429,6 @@ export const CompositionArea = ({
     <div className="CompositionArea__button-cell">
       <GiphyButton
         i18n={i18n}
-        knownPacks={knownPacks}
-        receivedPacks={receivedPacks}
-        installedPack={installedPack}
-        installedPacks={installedPacks}
-        blessedPacks={blessedPacks}
-        recentStickers={recentStickers}
-        clearInstalledStickerPack={clearInstalledStickerPack}
-        onClickAddPack={onClickAddPack}
-        onPickSticker={onPickSticker}
-        clearShowIntroduction={clearShowIntroduction}
-        showPickerHint={showPickerHint}
-        clearShowPickerHint={clearShowPickerHint}
         position={'top-end'}
       />
     </div>
