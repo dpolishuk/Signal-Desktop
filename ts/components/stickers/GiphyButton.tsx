@@ -47,27 +47,34 @@ export const GiphyButton = React.memo(
     const buttonRef = React.useRef<HTMLButtonElement | null>(null);
     const refMerger = useRefMerger();
     const [gifs, setGifs] = React.useState([]);
+    const [isLoading, setIsLoading] = React.useState(false);
     const [searchString, setSearchString] = React.useState("dogs");
 
     React.useEffect(() => {
-      // Function to get gifs
-      fetch(apiURL(searchString)).then((response) => {
-        return response.json()
-      }).then(function(json) {
-        Promise.all(json.data.map(async (item) => {
-          const data = await fetch(item.images.original.url);
-          const blob = await data.blob();
-          var urlCreator = window.URL || window.webkitURL;
-          var imageUrl = urlCreator.createObjectURL(blob);
-          return {
-            ...item,
-            blob: imageUrl
-          }
-        })).then(data => setGifs(data));
-      }).catch(function(ex) {
-        console.warn('ERROR: ', ex)
-      })
-    }, [searchString])
+      if (open) {
+        // Function to get gifs
+        setIsLoading(true);
+        fetch(apiURL(searchString)).then((response) => {
+          return response.json()
+        }).then(function(json) {
+          Promise.all(json.data.map(async (item) => {
+            const data = await fetch(item.images.preview_gif.url);
+            const blob = await data.blob();
+            var urlCreator = window.URL || window.webkitURL;
+            var imageUrl = urlCreator.createObjectURL(blob);
+            return {
+              ...item,
+              blob: imageUrl
+            }
+          })).then(data => {
+            setGifs(data);
+            setIsLoading(false);
+          });
+        }).catch(function(ex) {
+          console.warn('ERROR: ', ex)
+        })
+      }
+    }, [searchString, open])
 
     const handleClickButton = React.useCallback(() => {
       if (popperRoot) {
@@ -95,7 +102,6 @@ export const GiphyButton = React.memo(
     // Create popper root and handle outside clicks
     React.useEffect(() => {
       if (open) {
-        console.log('HERE!')
         const root = document.createElement('div');
         setPopperRoot(root);
         document.body.appendChild(root);
@@ -184,10 +190,27 @@ export const GiphyButton = React.memo(
         {open
           ? (
             <Modal hasXButton i18n={i18n} onClose={onClose}>
-              {
-                gifs.map((item) => (
-                  <img src={item?.blob} />
-                ))
+              { !isLoading ? 
+                <div>
+                  <input type='text' value={searchString} onChange={(e) => setSearchString(e.target.value)}/>
+                  <div style={{display: 'flex', flexWrap: 'wrap'}}>
+                    {
+                      gifs.map((item) => (
+                        <div style={{
+                          width: '90px',
+                          height: '90px',
+                          display: 'flex',
+                          overflow: 'hidden',
+                          justifyContent: 'center',
+                          margin: '5px'
+                        }}>
+                          <img src={item?.blob} />      
+                        </div>
+                      ))
+                    }
+                  </div>
+                </div>
+                : <p>LOAD</p>
               }
             </Modal>
           ) : null}
