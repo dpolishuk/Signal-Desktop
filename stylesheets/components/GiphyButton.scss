@@ -1,0 +1,44 @@
+@import '../mixins';
+@import '../../stylesheets/variables';
+
+.giphy__wrapper {
+
+  @include light-theme() {
+    background: $color-white;
+  }
+
+  @include dark-theme() {
+    background: $color-gray-75;
+  }
+}
+
+.gif__container {
+  width: 90px;
+  height: 90px;
+  display: flex;
+  overflow: hidden;
+  justify-content: center;
+  margin: 5px;
+  transition: box-shadow .3s;
+  border-radius: 5px;
+
+  @include light-theme() {
+    border: 1px solid $color-gray-75;
+  }
+
+  @include dark-theme() {
+    border: 1px solid $color-white;
+  }
+}
+
+.gif__container:hover {
+  cursor: pointer;
+  box-shadow: 0 0 22px rgba(23, 21, 21, 0.6);
+}
+
+.gif {
+  border-style: none;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}

@@ -3,20 +3,13 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import { get, noop } from 'lodash';
-import { Manager, Popper, Reference } from 'react-popper';
-import { createPortal } from 'react-dom';
-
-import type { StickerPackType, StickerType } from '../../state/ducks/stickers';
+import { debounce, get, noop, } from 'lodash';
+import { Manager, Reference } from 'react-popper';
 import type { LocalizerType } from '../../types/Util';
 import type { Theme } from '../../util/theme';
-import { countStickers } from './lib';
-import { offsetDistanceModifier } from '../../util/popperUtil';
-import { themeClassName } from '../../util/theme';
 import * as KeyboardLayout from '../../services/keyboardLayout';
 import { useRefMerger } from '../../hooks/useRefMerger';
 import { Modal } from '../Modal';
-
 
 const apiKey = process.env.GIPHY_API_KEY || "PrX9cDCZwBMq2bi1hYKd79r1h44fSCnk";
 
@@ -33,12 +26,39 @@ export type OwnProps = {
 
 export type Props = OwnProps;
 
+function useIsMounted() {
+  const isMountedRef = React.useRef(true);
+  React.useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+  return () => isMountedRef.current;
+}
+
+function useDebounce(cb, delay) {
+  const options = {
+    leading: false,
+    trailing: true
+  };
+  const inputsRef = React.useRef({cb, delay});
+
+  const isMounted = useIsMounted();
+  React.useEffect(() => { inputsRef.current = { cb, delay }; });
+  return React.useCallback(
+    debounce((...args) => {
+        if (inputsRef.current.delay === delay && isMounted())
+          inputsRef.current.cb(...args);
+      }, delay, options
+    ),
+    [delay, debounce]
+  );
+}
+
 export const GiphyButton = React.memo(
   ({
     className,
     i18n,
-    position = 'top-end',
-    theme,
   }: Props) => {
     const [open, setOpen] = React.useState(false);
     const [popperRoot, setPopperRoot] = React.useState<HTMLElement | null>(
@@ -50,9 +70,8 @@ export const GiphyButton = React.memo(
     const [isLoading, setIsLoading] = React.useState(false);
     const [searchString, setSearchString] = React.useState("dogs");
 
-    React.useEffect(() => {
-      if (open) {
-        // Function to get gifs
+    const getGifs = useDebounce(
+      () => {
         setIsLoading(true);
         fetch(apiURL(searchString)).then((response) => {
           return response.json()
@@ -73,6 +92,15 @@ export const GiphyButton = React.memo(
         }).catch(function(ex) {
           console.warn('ERROR: ', ex)
         })
+      },
+      1000
+    );
+
+    React.useEffect(() => {
+      if (open) {
+        // Function to get gifs
+        getGifs()
+        
       }
     }, [searchString, open])
 
@@ -190,28 +218,22 @@ export const GiphyButton = React.memo(
         {open
           ? (
             <Modal hasXButton i18n={i18n} onClose={onClose}>
-              { !isLoading ? 
-                <div>
+                <div className="giphy__wrapper">
                   <input type='text' value={searchString} onChange={(e) => setSearchString(e.target.value)}/>
-                  <div style={{display: 'flex', flexWrap: 'wrap'}}>
-                    {
-                      gifs.map((item) => (
-                        <div style={{
-                          width: '90px',
-                          height: '90px',
-                          display: 'flex',
-                          overflow: 'hidden',
-                          justifyContent: 'center',
-                          margin: '5px'
-                        }}>
-                          <img src={item?.blob} />      
-                        </div>
-                      ))
+                    { !isLoading ? 
+                      <div style={{display: 'flex', flexWrap: 'wrap'}}>
+                        {
+                          gifs.map((item) => (
+                            <div className='gif__container'>
+                              <img className='gif' src={item?.blob} />      
+                            </div>
+                          ))
+                        }
+                      </div>
+                      : <p>LOAD</p>
                     }
-                  </div>
                 </div>
-                : <p>LOAD</p>
-              }
+
             </Modal>
           ) : null}
       </Manager>
