@@ -127,10 +127,10 @@ function addAttachment(
     );
 
     // User has canceled the draft so we don't need to continue processing
-    if (!hasDraftAttachmentPending) {
-      await deleteDraftAttachment(onDisk);
-      return;
-    }
+    // if (!hasDraftAttachmentPending) {
+    //   await deleteDraftAttachment(onDisk);
+    //   return;
+    // }
 
     // Remove any pending attachments that were transcoding
     const index = draftAttachments.findIndex(
@@ -146,6 +146,8 @@ function addAttachment(
       nextAttachments = replaceIndex(draftAttachments, index, onDisk);
     }
 
+    console.log('HERE!!!', onDisk, draftAttachments, hasDraftAttachmentPending, nextAttachments)
+    
     replaceAttachments(conversationId, nextAttachments)(
       dispatch,
       getState,

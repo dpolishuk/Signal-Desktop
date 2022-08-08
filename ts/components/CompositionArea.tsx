@@ -256,7 +256,6 @@ export const CompositionArea = ({
   isSMSOnly,
   isFetchingUUID,
 }: Props): JSX.Element => {
-  const [show, setShow] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [large, setLarge] = useState(false);
@@ -267,8 +266,8 @@ export const CompositionArea = ({
   const emojiButtonRef = useRef<EmojiButtonAPI | undefined>();
   const fileInputRef = useRef<null | HTMLInputElement>(null);
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+
+  console.log('THERE', draftAttachments)
 
   const handleForceSend = useCallback(() => {
     setLarge(false);
@@ -430,6 +429,8 @@ export const CompositionArea = ({
       <GiphyButton
         i18n={i18n}
         position={'top-end'}
+        conversationId={conversationId}
+        addAttachment={addAttachment}
       />
     </div>
   );

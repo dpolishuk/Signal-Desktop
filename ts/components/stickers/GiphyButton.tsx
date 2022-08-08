@@ -10,6 +10,8 @@ import type { Theme } from '../../util/theme';
 import * as KeyboardLayout from '../../services/keyboardLayout';
 import { useRefMerger } from '../../hooks/useRefMerger';
 import { Modal } from '../Modal';
+import { AttachmentDraftType, InMemoryAttachmentDraftType } from '../../types/Attachment';
+import { IMAGE_GIF } from '../../types/MIME';
 
 const apiKey = process.env.GIPHY_API_KEY || "PrX9cDCZwBMq2bi1hYKd79r1h44fSCnk";
 
@@ -22,6 +24,11 @@ export type OwnProps = {
   readonly i18n: LocalizerType;
   readonly position?: 'top-end' | 'top-start';
   readonly theme?: Theme;
+  readonly conversationId: string;
+  addAttachment: (
+    conversationId: string,
+    attachment: InMemoryAttachmentDraftType
+  ) => unknown;
 };
 
 export type Props = OwnProps;
@@ -59,6 +66,8 @@ export const GiphyButton = React.memo(
   ({
     className,
     i18n,
+    conversationId,
+    addAttachment
   }: Props) => {
     const [open, setOpen] = React.useState(false);
     const [popperRoot, setPopperRoot] = React.useState<HTMLElement | null>(
@@ -115,13 +124,29 @@ export const GiphyButton = React.memo(
       setOpen,
     ]);
 
-    // const handlePickSticker = React.useCallback(
-    //   (packId: string, stickerId: number, url: string) => {
-    //     setOpen(false);
-    //     onPickSticker(packId, stickerId, url);
-    //   },
-    //   [setOpen, onPickSticker]
-    // );
+    const handlePickGif = React.useCallback(
+      async (data) => {
+        setOpen(false);
+        console.log(data)
+        const newData = await fetch(data.images.original.url);
+        const blob = await newData.blob();
+        
+        const buffer = await blob.arrayBuffer()
+        const uint = new Uint8Array(buffer);
+
+        const newAttachment = {
+          url: data.images.original.url,
+          pending: false,
+          screenshotData: uint,
+          contentType: IMAGE_GIF,
+          data: uint,
+          size: data.images.original.size,
+        };
+        addAttachment(conversationId, newAttachment)
+        console.log(addAttachment)
+      },
+      [setOpen]
+    );
 
     const onClose = React.useCallback(() => {
       setOpen(false);
@@ -225,7 +250,7 @@ export const GiphyButton = React.memo(
                         {
                           gifs.map((item) => (
                             <div className='gif__container'>
-                              <img className='gif' src={item?.blob} />      
+                              <img className='gif' src={item?.blob} onClick={() => handlePickGif(item)}/>      
                             </div>
                           ))
                         }
