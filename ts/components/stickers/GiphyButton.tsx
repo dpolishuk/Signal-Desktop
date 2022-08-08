@@ -140,7 +140,7 @@ export const GiphyButton = React.memo(
           screenshotData: uint,
           contentType: IMAGE_GIF,
           data: uint,
-          size: data.images.original.size,
+          size: Number(data.images.original.size),
         };
         addAttachment(conversationId, newAttachment)
         console.log(addAttachment)
